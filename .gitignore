@@ -1,2 +1,4 @@
 data/*
 .DS_Store
+deployment/data/*
+deployment/qdrant_storage/*

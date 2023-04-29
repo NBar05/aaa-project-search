@@ -53,6 +53,7 @@ assert collection_info.vectors_count == 0
 
 print()
 print('3')
+print('3')
 print()
 
 points = []
@@ -78,8 +79,10 @@ operation_info = client.upsert(
     wait=True,
     points=points
 )
-print('Database is ready')
 
+print()
+print('Database is ready')
+print()
 
 app = Flask(__name__)
 
@@ -92,7 +95,11 @@ def search_items_for_query(text):
         limit=10
     )
 
-    return search_result
+    return {
+        'text': text,
+        '1-nearest title': str(search_result[0].title),
+        '2-nearest title': str(search_result[1].title),
+    }
 
 
 if __name__ == '__main__':
