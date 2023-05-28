@@ -10,7 +10,7 @@ services:
     volumes:
       - "./qdrant_storage:/qdrant/storage"
 
-  abstract_server:
+  search_server:
     build: .
     ports:
       - "8080:8080"

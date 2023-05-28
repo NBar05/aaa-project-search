@@ -1,8 +1,13 @@
 FROM python:3.10
 
+ENV PYTHONDONTWRITEBYTECODE=1
+
 WORKDIR /app
-
 COPY . /app
-RUN pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
 
-CMD [ "python", "/app/src/app.py" ]
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# CMD ["python", "/app/lib/engine.py", "&&", "python", "/app/run.py"]
+
+CMD python /app/lib/engine.py; python /app/run.py
