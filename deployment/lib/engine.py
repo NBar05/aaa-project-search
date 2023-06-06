@@ -8,13 +8,10 @@ def create_connection():
 
 if __name__ == '__main__':
     import os
-    import sys
-
+    
     from tqdm import tqdm
-
     import pandas as pd
 
-    sys.path.append('/app/lib')
     from models import create_model
     from qdrant_client.http.models import Distance, VectorParams, CollectionStatus, PointStruct
 
@@ -30,7 +27,7 @@ if __name__ == '__main__':
 
     client.recreate_collection(
         collection_name='test_collection', 
-        vectors_config=VectorParams(size=312, distance=Distance.DOT),
+        vectors_config=VectorParams(size=64, distance=Distance.COSINE),
     )
 
     collection_info = client.get_collection(collection_name='test_collection')

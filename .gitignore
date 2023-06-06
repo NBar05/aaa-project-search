@@ -1,4 +1,5 @@
 data/*
 .DS_Store
 deployment/data/*
+deployment/model_tuned/*
 deployment/qdrant_storage/*
