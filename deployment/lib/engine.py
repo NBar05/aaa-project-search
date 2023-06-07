@@ -19,6 +19,10 @@ if __name__ == '__main__':
     df = pd.read_hdf('./data/search_relevance_dataset_v1.hdf', 'table')
     df.drop(columns=['query_id', 'query_category_id', 'query_microcat_id', 'query_location_id'], inplace=True)
     df = df.drop_duplicates(subset=['item_id']).reset_index(drop=True)
+
+    df['title_model'] = df.title.apply(lambda text: ' '.join(text.lower().split()))
+    df['title_model'] = 'объявление: ' + df['title_model']
+
     print()
     print('Shape of dataset to index:', df.shape)
     print()
@@ -42,7 +46,7 @@ if __name__ == '__main__':
         points.append(
             PointStruct(
                 id=row.Index,
-                vector=list(map(float, model(row.title))), # list(map(float.. to make proper type
+                vector=list(map(float, model(row.title_model))), # list(map(float.. to make proper type
                 payload={
                     'title': row.title,
                     'description': row.description,

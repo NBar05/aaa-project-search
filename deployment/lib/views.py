@@ -12,13 +12,15 @@ class IndexView(View):
             form = await self.request.post()
             text = form['text']
 
+            text_model = 'запрос: ' + ' '.join(text.lower().split())
+
             client = self.request.app['client']
             model = self.request.app['model']
 
             search_result = client.search(
                 collection_name='test_collection',
-                query_vector=list(map(float, model(text))), 
-                limit=10
+                query_vector=list(map(float, model(text_model))), 
+                limit=50
             )
 
             items = []
@@ -28,6 +30,7 @@ class IndexView(View):
                         'title': item.payload['title'],
                         'description': item.payload['description'],
                         'keywords': item.payload['keywords'],
+                        'score': f'{item.score:.3f}',
                     }
                 )
             ctx = {'text': text, 'items': items}
