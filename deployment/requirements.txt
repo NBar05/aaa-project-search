@@ -1,6 +1,6 @@
 numpy
 pandas
-tables
+pyarrow
 tqdm
 torch
 transformers

@@ -1,0 +1,17 @@
+.container .table td div.collapse[aria-expanded="false"] {
+    display: block;
+    height: 40px !important;
+    overflow: hidden;
+}
+
+.container .table td div.collapsing[aria-expanded="false"] {
+    height: 40px !important;
+}
+
+.container .table td a:before {
+    content: 'Тык';
+}
+
+.container .table td a.collapsed:before {
+    content: 'Тык';
+}
