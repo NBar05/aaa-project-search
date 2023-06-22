@@ -1,4 +1,8 @@
 {
+  "additional_special_tokens": [
+    "[Q]",
+    "[I]"
+  ],
   "cls_token": "[CLS]",
   "mask_token": "[MASK]",
   "pad_token": "[PAD]",

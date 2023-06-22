@@ -12,14 +12,15 @@ class IndexView(View):
             form = await self.request.post()
             text = form['text']
 
-            text_model = 'запрос: ' + ' '.join(text.lower().split())
-
             client = self.request.app['client']
-            model = self.request.app['model']
+            tokenizer, model = self.request.app['model']
+
+            tokenized_text = tokenizer(text)
+            embedding_vect = model(tokenized_text)[0]
 
             search_result = client.search(
                 collection_name='test_collection',
-                query_vector=list(map(float, model(text_model))), 
+                query_vector=list(map(float, embedding_vect)), 
                 limit=50
             )
 

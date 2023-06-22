@@ -10,22 +10,28 @@ from lib.engine import create_connection
 from lib.models import create_model
 
 
-lib = Path('lib')
+LIB_PATH = Path('lib')
 
 
 def create_app() -> Application:
+    """
+    Create and configure an instance of the Application class.
+
+    :return: Configured instance of the Application class.
+    """
     app = Application()
 
-    # setup routes
-    app.router.add_static('/static/', lib / 'static')
+    # Setup static routes and views
+    app.router.add_static('/static/', LIB_PATH / 'static')
     app.router.add_view('/', views.IndexView, name='index')
 
-    # setup templates
+    # Setup jinja2 template engine
     aiohttp_jinja2.setup(
         app=app,
-        loader=jinja2.FileSystemLoader(lib / 'templates'),
+        loader=jinja2.FileSystemLoader(LIB_PATH / 'templates'),
     )
 
+    # Create DB connection and model
     app['client'] = create_connection()
     app['model'] = create_model()
 

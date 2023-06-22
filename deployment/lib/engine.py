@@ -1,60 +1,62 @@
 from qdrant_client import QdrantClient
+from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDiff
 
 import torch
 import numpy as np
 import pandas as pd
+from typing import List, Dict, Any
 
 
-def create_connection():
+def create_connection() -> QdrantClient:
     """
-    Init connection to qdrant db & searh engine
+    Initialize connection to qdrant db & search engine.
 
+    Returns:
+        QdrantClient: The initialized client object.
     """
     client = QdrantClient(host='qdrant', port=6333)
     return client
 
 
-def retrieve_embeddings(df, model, batch_size=256):
+def retrieve_embeddings(df: pd.DataFrame, model: Any, tokenizer: Any, batch_size: int = 512) -> np.ndarray:
     """
-    Function for embeddings retrieving for all items in df
+    Function for retrieving embeddings for all items in the DataFrame.
+
     Args:
-    - df: df with "title_model" col for each item
-    - model: model to use for embeddings
-    - batch_size: how many samples to process at once
+        df (pd.DataFrame): DataFrame with "title_model" column for each item.
+        model (Any): The model to use for embeddings.
+        tokenizer (Any): The tokenizer to use for tokenization.
+        batch_size (int, optional): Number of samples to process at once.
 
-    Return:
-    - matrix of df embeddings
-
+    Returns:
+        np.ndarray: Matrix of embeddings for the DataFrame.
     """
-    model.eval()
-    df = df.loc[:, 'title_model'].tolist()
+    df = df['title'].tolist()
 
     num_batches = (len(df) // batch_size) + (len(df) % batch_size > 0)
 
+    embeds = []
     with torch.no_grad():
-        embeds = []
         for i in range(num_batches):
             start, end = i * batch_size, (i + 1) * batch_size
             batch = df[start:end]
 
-            embeds.append(model(batch).cpu().numpy())
+            batch = tokenizer(batch, type_of_text='item')
+
+            embeds.append(model(batch))
 
     return np.concatenate(embeds, axis=0)
 
 
 def main():
-    from qdrant_client.http.models import Distance, VectorParams, OptimizersConfigDiff
     from models import create_model
 
+    df = pd.read_feather('./data/search_relevance_dataset_v1.feather')
 
-    df = pd.read_feather('./data/search_relevance_dataset_v1.feather').iloc[:10000]
-    df['title_model'] = df.title.apply(lambda text: ' '.join(text.lower().split()))
-    df['title_model'] = 'объявление: ' + df['title_model']
+    tokenizer, model = create_model()
 
-    model = create_model()
-
-    embeddings = retrieve_embeddings(df, model)
-    payload = [
+    embeddings = retrieve_embeddings(df, model, tokenizer)
+    payload: List[Dict[str, str]] = [
         {
             'title': row.title,
             'description': row.description,
@@ -71,7 +73,7 @@ def main():
             size=embeddings.shape[1],
             distance=Distance.COSINE,
         ),
-        shard_number=2, # parallelize upload of a large dataset
+        shard_number=2,
         optimizers_config=OptimizersConfigDiff(
             indexing_threshold=0,
         ),
@@ -81,7 +83,7 @@ def main():
         collection_name='test_collection',
         vectors=embeddings,
         payload=payload,
-        ids=None, # Vector ids will be assigned automatically
+        ids=None,
         batch_size=2048,
     )
 
